@@ -76,18 +76,32 @@ class CrudClients(ICrud):
 
             
             if es_vip:
-               
                 cliente = VipClient(nombre, apellido, dni)
+            
+                while True:
+                    try:
+                    # Solicitar al usuario que ingrese el límite de crédito
+                        gotoxy(5, 14)
+                        limite = int(input("Ingrese el límite de crédito del cliente VIP (10000-20000): "))
+                    
+                    # Validar que el límite esté en el rango permitido
+                        if 10000 <= limite <= 20000:
+                            cliente.limit = limite
+                            break  # Si el valor es válido, salir del bucle
+                        else:
+                            gotoxy(5, 16)
+                            print("\033[31mError: El límite de crédito debe estar entre 10000 y 20000.\033[0m")
                 
-                gotoxy(5, 14)
-                limite = input("Ingrese el límite de crédito del cliente VIP (10000-20000): ")
-                cliente.limit = int(limite)  
+                    except ValueError:
+                        gotoxy(5, 16)
+                        print("\033[31mError: Ingrese un número válido.\033[0m")
+
             elif es_regular:
-               
                 cliente = RegularClient(nombre, apellido, dni, card=True)
+
             else:
-                
                 cliente = Client(nombre, apellido, dni)
+
 
             
             json_file = JsonFile(path + '/archivos/clients.json')
@@ -126,7 +140,15 @@ class CrudClients(ICrud):
         while True:
             borrarPantalla()
             valida = Valida()
-            dni = input("Ingrese el DNI del cliente a actualizar: ")
+             # Título
+            gotoxy(1, 1)
+            print("\033[1;32m" + "█" * 80)  # Línea verde
+            gotoxy(2, 2)
+            print("██" + " " * 16 + "Menú de actualización de Clientes" + " " * 24 + "██")
+            gotoxy(3, 1)
+            
+
+            gotoxy(1, 5);dni = input("Ingrese el DNI del cliente a actualizar: ")
 
             # Leer los clientes de la base de datos
             json_file = JsonFile(path + '/archivos/clients.json')
@@ -236,7 +258,14 @@ class CrudClients(ICrud):
             # Leer archivo JSON
             json_file = JsonFile(path + '/archivos/clients.json')
             clientes = json_file.read()
-            
+             # Título
+            gotoxy(2, 1)
+            print("\033[1;32m" + "█" * 90)  # Línea verde
+            gotoxy(2, 2)
+            print("██" + " " * 34 + "Menú de eliminacion de Clientes" + " " * 25 + "██")
+            gotoxy(3, 1)
+            print("\033[1;32m" + "█" * 90)  # Línea verde
+
             # Solicitar DNI del cliente a eliminar
             dni = input("Ingrese el DNI del cliente a eliminar: ")
             
@@ -299,70 +328,80 @@ class CrudClients(ICrud):
 
 
     def consult(self):
-        # Consultar información de un cliente
-        borrarPantalla()
-        json_file = JsonFile(path + '/archivos/clients.json')
-        clientes = json_file.read()
+        while True:
+            # Consultar información de un cliente
+            borrarPantalla()
+            json_file = JsonFile(path + '/archivos/clients.json')
+            clientes = json_file.read()
+            # Título
+            gotoxy(2, 1)
+            print("\033[1;32m" + "█" * 90)  # Línea verde
+            gotoxy(2, 2)
+            print("██" + " " * 34 + "Menú de Creación de Clientes" + " " * 25 + "██")
+            gotoxy(3, 1)
+            print("\033[1;32m" + "█" * 90)  # Línea verde
 
-        gotoxy(2, 2); print("Consultar un cliente:")
-        dni = input("Ingrese el DNI del cliente a consultar: ")
-        
-        # Buscar el cliente por DNI
-        cliente = None
-        for c in clientes:
-            if c["dni"] == dni:
-                cliente = c
-                break
+            dni = input("Ingrese el DNI del cliente a consultar: ")
+            
+            # Buscar el cliente por DNI
+            cliente = None
+            for c in clientes:
+                if c["dni"] == dni:
+                    cliente = c
+                    break
 
-        # Si el cliente no fue encontrado
-        if cliente is None:
-            gotoxy(2, 5); print("Cliente no encontrado.")
-            input("Presione enter para regresar al menú. ")
-            return
+            # Si el cliente no fue encontrado
+            if cliente is None:
+                gotoxy(2, 5); print("Cliente no encontrado.")
+                input("Presione enter para regresar al menú. ")
+                return
 
-        borrarPantalla()
+            borrarPantalla()
 
-        # Determinar el tipo de cliente
-        if "valor" in cliente:
-            if cliente["valor"] == 0.10:
-                cliente_tipo = "Regular"
+            # Determinar el tipo de cliente
+            if "valor" in cliente:
+                if cliente["valor"] == 0.10:
+                    cliente_tipo = "Regular"
+                else:
+                    cliente_tipo = "VIP"
             else:
-                cliente_tipo = "VIP"
-        else:
-            cliente_tipo = "Final"
+                cliente_tipo = "Final"
 
-        # Mostrar encabezado con el tipo de cliente
-        print("\033[1;34m" + f" Cliente encontrado (Tipo: {cliente_tipo}) ".center(50, "=") + "\033[0m")
+            # Mostrar encabezado con el tipo de cliente
+            print("\033[1;34m" + f" Cliente encontrado (Tipo: {cliente_tipo}) ".center(50, "=") + "\033[0m")
 
-        # Crear un formato de tabla con encabezados
-        print("\033[1;34m" + "-" * 45 + "\033[0m")
-        # Cambiar el color del mensaje a verde
-        print(f"\033[34m\033[1m| {'Campo':<20} | {'Información':<18} |\033[0m")
+            # Crear un formato de tabla con encabezados
+            print("\033[1;34m" + "-" * 45 + "\033[0m")
+            # Cambiar el color del mensaje a verde
+            print(f"\033[34m\033[1m| {'Campo':<20} | {'Información':<18} |\033[0m")
 
-        print("\033[1;34m" + "-" * 45 + "\033[0m")
+            print("\033[1;34m" + "-" * 45 + "\033[0m")
 
-        # Imprimir los datos del cliente en la tabla
-        print(f"\033[33m| {'NOMBRE':<20} | {cliente['nombre']:<18} |\033[0m")
-        print("\033[33m" + "-" * 45 + "\033[0m")
-        print(f"\033[33m| {'APELLIDO':<20} | {cliente['apellido']:<18} |\033[0m")
-        print("\033[33m" + "-" * 45 + "\033[0m")
-        print(f"\033[33m| {'CÉDULA':<20} | {cliente['dni']:<18} |\033[0m")
-        print("\033[33m" + "-" * 45 + "\033[0m")
+            # Imprimir los datos del cliente en la tabla
+            print(f"\033[33m| {'NOMBRE':<20} | {cliente['nombre']:<18} |\033[0m")
+            print("\033[33m" + "-" * 45 + "\033[0m")
+            print(f"\033[33m| {'APELLIDO':<20} | {cliente['apellido']:<18} |\033[0m")
+            print("\033[33m" + "-" * 45 + "\033[0m")
+            print(f"\033[33m| {'CÉDULA':<20} | {cliente['dni']:<18} |\033[0m")
+            print("\033[33m" + "-" * 45 + "\033[0m")
 
 
-        # Dependiendo del tipo de cliente, mostrar información adicional
-        if cliente_tipo == "Regular":
-            # Mostrar si el cliente tiene tarjeta de descuento
-            tarjeta_texto = 'Sí' if cliente['valor'] == 0.10 else 'No'
-            print(f"| {'Tarjeta de descuento':<20} | {tarjeta_texto:<18} |")
-        elif cliente_tipo == "VIP":
-            # Mostrar el límite de crédito del cliente VIP
-            print(f"\033[33m| {'LÍMITE DE CRÉDITO':<20} | {cliente['valor']:<18} |\033[0m")
-        # Cerrar la tabla con una línea de separación inferior
-        print("\033[1;34m" + "-" * 45 + "\033[0m")
+            # Dependiendo del tipo de cliente, mostrar información adicional
+            if cliente_tipo == "Regular":
+                # Mostrar si el cliente tiene tarjeta de descuento
+                tarjeta_texto = 'Sí' if cliente['valor'] == 0.10 else 'No'
+                print(f"| {'Tarjeta de descuento':<20} | {tarjeta_texto:<18} |")
+            elif cliente_tipo == "VIP":
+                # Mostrar el límite de crédito del cliente VIP
+                print(f"\033[33m| {'LÍMITE DE CRÉDITO':<20} | {cliente['valor']:<18} |\033[0m")
+            # Cerrar la tabla con una línea de separación inferior
+            print("\033[1;34m" + "-" * 45 + "\033[0m")
 
-        # Esperar a que el usuario presione enter para regresar al menú
-        input("Presione enter para regresar al menú. ")
+            # Esperar a que el usuario presione enter para regresar al menú
+            input("Presione enter para regresar al menú. ")
+            decision = input("\033[32m¿Desea eliminar otro cliente? (si/no): \033[0m").strip().lower()
+            if decision == 'no':
+                break
 
     def all_consult(self):
         # Borrar pantalla
@@ -397,53 +436,64 @@ class CrudProducts(ICrud):
         self.json_file = JsonFile(json_file_path)
 
     def create(self):
-        borrarPantalla()
-        
-        # Crear un nuevo producto
-        gotoxy(2, 1)
-        print("\033[1;35m" + "█" * 90)
-        gotoxy(2, 2)
-        print("██" + " " * 34 + "Menú de Creación de Productos" + " " * 25 + "██")
-        gotoxy(3, 1)
-        print("\033[1;35m" + "█" * 90)
-        
-        # Solicitar datos del producto
-        gotoxy(5, 4)
-        descripcion = input("Ingrese el nombre del producto: ")
-        gotoxy(5, 6)
-        precio = float(input("Ingrese el precio: "))
-        gotoxy(5, 8)
-        stock = int(input("Cantidad en stock: "))
+        while True:
+            borrarPantalla()
+            
+            # Crear un nuevo producto
+            gotoxy(2, 1)
+            print("\033[1;35m" + "█" * 90)
+            gotoxy(2, 2)
+            print("██" + " " * 34 + "Menú de Creación de Productos" + " " * 25 + "██")
+            gotoxy(3, 1)
+            print("\033[1;35m" + "█" * 90)
+            
+            # Solicitar datos del producto
+            gotoxy(5, 4)
+            descripcion = input("Ingrese el nombre del producto: ")
+            gotoxy(5, 6)
+            precio = float(input("Ingrese el precio: "))
+            gotoxy(5, 8)
+            stock = int(input("Cantidad en stock: "))
 
-        # Leer datos de productos existentes
-        json_file = JsonFile(path + '/archivos/products.json')
-        productos = json_file.read()
+            # Leer datos de productos existentes
+            json_file = JsonFile(path + '/archivos/products.json')
+            productos = json_file.read()
 
-        # Obtener el próximo ID disponible
-        if productos:
-            nuevo_id = productos[-1]['id'] + 1
-        else:
-            nuevo_id = 1
+            # Obtener el próximo ID disponible
+            if productos:
+                nuevo_id = productos[-1]['id'] + 1
+            else:
+                nuevo_id = 1
 
-        # Crear una nueva instancia de Product
-        producto = Product(nuevo_id, descripcion, precio, stock)
+            # Crear una nueva instancia de Product
+            producto = Product(nuevo_id, descripcion, precio, stock)
 
-        # Agregar el nuevo producto a la lista de productos
-        productos.append(producto.getJson())
+            # Agregar el nuevo producto a la lista de productos
+            productos.append(producto.getJson())
 
-        # Guardar los productos actualizados en el archivo JSON
-        json_file.save(productos)
+            # Guardar los productos actualizados en el archivo JSON
+            json_file.save(productos)
 
-        gotoxy(5, 10)
-        print("Producto agregado con éxito.")
-        gotoxy(5, 12)
-        input("Presione Enter para regresar.")
+            gotoxy(5, 10)
+            print("Producto agregado con éxito.")
+            gotoxy(5, 12)
+            input("Presione Enter para regresar.")
+            decision = input("\033[32m¿Desea eliminar otro cliente? (si/no): \033[0m").strip().lower()
+            if decision == 'no':
+                break
 
     def update(self):
         while True:
             # Actualizar un producto existente
             borrarPantalla()
-            gotoxy(2, 2); print("Actualizar un producto existente:")
+             # Título
+            gotoxy(2, 1)
+            print("\033[1;32m" + "█" * 90)  # Línea verde
+            gotoxy(2, 2)
+            print("██" + " " * 34 + "Menú de actualización de productos" + " " * 25 + "██")
+            gotoxy(3, 1)
+            print("\033[1;32m" + "█" * 90)  # Línea verde
+
             id_producto = int(input("Ingrese el ID del producto a actualizar: "))
             
             json_file = JsonFile(path + '/archivos/products.json')
@@ -893,69 +943,73 @@ class CrudSales(ICrud):
 
     
     def consult(self):
-        borrarPantalla()
-        print('\033c', end='')
-        gotoxy(2, 1)
-        print("\033[1;36m" + "█" * 90)
-        gotoxy(2, 2)
-        print("██" + " " * 34 + "Consulta de Venta" + " " * 34 + "██")
-        gotoxy(2, 4)
-        
-        # Solicitar el número de factura a consultar
-        num_factura = input("\033[32mIngrese el número de factura a consultar: \033[0m")
-        
-        if not num_factura.isdigit():
-            gotoxy(2, 6)
-            print("\033[31mError: Ingrese un número de factura válido.\033[0m")
-            time.sleep(2)
-            return
-        
-        num_factura = int(num_factura)
-        json_file = JsonFile(path + '/archivos/invoices.json')
-        invoices = json_file.read()
-        
-        # Buscar la venta con el número de factura proporcionado
-        venta_encontrada = None
-        for invoice in invoices:
-            if invoice["factura"] == num_factura:
-                venta_encontrada = invoice
+        while True:
+            borrarPantalla()
+            print('\033c', end='')
+            gotoxy(2, 1)
+            print("\033[1;36m" + "█" * 90)
+            gotoxy(2, 2)
+            print("██" + " " * 34 + "Consulta de Venta" + " " * 34 + "██")
+            gotoxy(2, 4)
+            
+            # Solicitar el número de factura a consultar
+            num_factura = input("\033[32mIngrese el número de factura a consultar: \033[0m")
+            
+            if not num_factura.isdigit():
+                gotoxy(2, 6)
+                print("\033[31mError: Ingrese un número de factura válido.\033[0m")
+                time.sleep(2)
+                return
+            
+            num_factura = int(num_factura)
+            json_file = JsonFile(path + '/archivos/invoices.json')
+            invoices = json_file.read()
+            
+            # Buscar la venta con el número de factura proporcionado
+            venta_encontrada = None
+            for invoice in invoices:
+                if invoice["factura"] == num_factura:
+                    venta_encontrada = invoice
+                    break
+            
+            # Mostrar la información de la venta si se encuentra
+            if venta_encontrada:
+                borrarPantalla()
+                print("\033[1;36m" + "█" * 90 + "\033[0m")
+                print("\033[1;36m" + "██" + " " * 35 + "Venta Detalles" + " " * 37 + "██" + "\033[0m")
+                print("\033[1;36m" + "█" * 90 + "\033[0m")
+                print(f"\033[32mFactura #: {venta_encontrada['factura']}     Fecha: {venta_encontrada['Fecha']}    Cliente: {venta_encontrada['cliente']}\033[0m")
+                print("\033[1;34m" + "-" * 90 + "\033[0m")
+                print(f"\033[32mSubtotal: {venta_encontrada['subtotal']}     Descuento: {venta_encontrada['descuento']}     IVA: {venta_encontrada['iva']}     Total: {venta_encontrada['total']}\033[0m")
+                print("\033[1;34m" + "-" * 90 + "\033[0m")
+                
+                # Mostrar los detalles de los productos en formato de tabla
+                
+                print("\033[1;34m" + "-" * 90 + "\033[0m")
+                
+                print("\033[1m{:15s} {:10s} {:10s}\033[0m".format("Producto", "Precio", "Cantidad"))
+            
+                print("\033[1;34m" + "-" * 90 + "\033[0m")
+                
+                for detalle in venta_encontrada["detalle"]:
+                    
+                    print("{:15s} {:10.2f} {:10}".format(
+                        detalle["poducto"],
+                        detalle["precio"],
+                        detalle["cantidad"]
+                    ))
+                
+                # Dar opción al usuario para continuar
+                gotoxy(2, 20)
+                input("\033[32mPresione cualquier tecla para continuar...\033[0m")
+            else:
+                gotoxy(2, 6)
+                print("\033[31mNo se encontró una venta con ese número de factura.\033[0m")
+                time.sleep(2)
+            decision = input("\033[32m¿Desea eliminar otro cliente? (si/no): \033[0m").strip().lower()
+            if decision == 'no':
                 break
         
-        # Mostrar la información de la venta si se encuentra
-        if venta_encontrada:
-            borrarPantalla()
-            print("\033[1;36m" + "█" * 90 + "\033[0m")
-            print("\033[1;36m" + "██" + " " * 35 + "Venta Detalles" + " " * 37 + "██" + "\033[0m")
-            print("\033[1;36m" + "█" * 90 + "\033[0m")
-            print(f"\033[32mFactura #: {venta_encontrada['factura']}     Fecha: {venta_encontrada['Fecha']}    Cliente: {venta_encontrada['cliente']}\033[0m")
-            print("\033[1;34m" + "-" * 90 + "\033[0m")
-            print(f"\033[32mSubtotal: {venta_encontrada['subtotal']}     Descuento: {venta_encontrada['descuento']}     IVA: {venta_encontrada['iva']}     Total: {venta_encontrada['total']}\033[0m")
-            print("\033[1;34m" + "-" * 90 + "\033[0m")
-            
-            # Mostrar los detalles de los productos en formato de tabla
-            
-            print("\033[1;34m" + "-" * 90 + "\033[0m")
-            
-            print("\033[1m{:15s} {:10s} {:10s}\033[0m".format("Producto", "Precio", "Cantidad"))
-           
-            print("\033[1;34m" + "-" * 90 + "\033[0m")
-            
-            for detalle in venta_encontrada["detalle"]:
-                
-                print("{:15s} {:10.2f} {:10}".format(
-                    detalle["poducto"],
-                    detalle["precio"],
-                    detalle["cantidad"]
-                ))
-            
-            # Dar opción al usuario para continuar
-            gotoxy(2, 20)
-            input("\033[32mPresione cualquier tecla para continuar...\033[0m")
-        else:
-            gotoxy(2, 6)
-            print("\033[31mNo se encontró una venta con ese número de factura.\033[0m")
-            time.sleep(2)
-    
     def all_consult(self):
         # Borrar pantalla
         borrarPantalla()
@@ -966,31 +1020,29 @@ class CrudSales(ICrud):
         
         # Verificar si hay ventas
         if not ventas:
-            gotoxy(2, 2)
             print("\033[31mNo hay ventas para mostrar.\033[0m")
         else:
-            # Mostrar encabezados de la tabla
-            gotoxy(2, 2)
-            print("\033[1;34m" + "=" * 70 + "\033[0m")
-            gotoxy(2, 3)
-            print(f"\033[1m| {'Factura':<10} | {'Fecha':<12} | {'Cliente':<20} | {'Subtotal':<10} | {'Total':<10} | {'Detalle':<10} |\033[0m")
-            gotoxy(2, 4)
-            print("\033[1;34m" + "=" * 70 + "\033[0m")
-            
+            print("\033[1;34m" + "=" * 120 + "\033[0m")
+            print("\033[1;34m| {0:<10} | {1:<12} | {2:<20} | {3:<10} | {4:<10} | {5:<22} |\033[0m".format(
+                "Factura", "Fecha", "Cliente", "Subtotal", "Total", "Detalles"))
+            print("\033[1;34m" + "=" * 120 + "\033[0m")
+
             # Mostrar información de cada venta
             for venta in ventas:
                 # Formatear los detalles de los productos en la venta
-                detalles = ", ".join([f"{detalle['poducto']} ({detalle['cantidad']} x {detalle['precio']})" for detalle in venta['detalle']])
+                detalles = ", ".join(
+                    f"{detalle['poducto']} ({detalle['cantidad']} x {detalle['precio']})"
+                    for detalle in venta['detalle']
+                )
                 
                 # Mostrar la información de la factura en la tabla
-                gotoxy(2, 5)
-                print(f"| {venta['factura']:<10} | {venta['Fecha']:<12} | {venta['cliente']:<20} | {venta['subtotal']:<10} | {venta['total']:<10} | {detalles:<20} |")
-                print("\033[1;34m" + "-" * 70 + "\033[0m")
-            
-            # Esperar a que el usuario presione una tecla para regresar al menú
-            gotoxy(2, 6)
-            input("\033[32mPresione una tecla para regresar al menú.\033[0m")
+                print(f"| {venta['factura']:<10} | {venta['Fecha']:<12} | {venta['cliente']:<20} | {venta['subtotal']:<10} | {venta['total']:<10} | {detalles:<22} |")
+                
+                # Divisor de línea entre registros
+                print("\033[1;34m" + "=" * 120 + "\033[0m")
 
+        # Esperar a que el usuario presione una tecla para regresar al menú
+        input("\033[32mPresione una tecla para regresar al menú.\033[0m")
 
 # Menu Proceso Principal
 opc = ''
